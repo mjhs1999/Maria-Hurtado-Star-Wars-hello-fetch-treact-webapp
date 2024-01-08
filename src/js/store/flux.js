@@ -1,47 +1,175 @@
 const getState = ({ getStore, getActions, setStore }) => {
+
+
 	return {
-	  store: {
-		demo: [
-		  // Your existing demo data remains here
-		],
-		people: [], // New state to store people data from SWAPI
-		planets: [], // New state to store planets data from SWAPI
-		favorites: [] // New state to store favorites
-	  },
-	  actions: {
-		// Your existing actions remain here
-  
-		setPeople: people => {
-		  // Update the store with people data from SWAPI
-		  console.log("Setting people data:", people); // Log the people data
-		  setStore({ people });
+		store: {
+			Planets: [],
+			DetallesP: [],
+			Characters: [],
+			Detalles: [],
+			listado: [],
+			contador: 0
 		},
-  
-		setPlanets: planets => {
-		  // Update the store with planets data from SWAPI
-		  console.log("Setting planets data:", planets); // Log the planets data
-		  setStore({ planets });
-		},
-  
-		addToFavorites: item => {
-		  // Add item to favorites if not already present
-		  const store = getStore();
-		  const isDuplicate = store.favorites.some(fav => fav.uid === item.uid);
-  
-		  if (!isDuplicate) {
-			setStore({ favorites: [...store.favorites, item] });
-			console.log(`Added to favorites: ${item.name}`);
-		  }
-		},
-  
-		removeFromFavorites: item => {
-		  // Remove item from favorites
-		  const store = getStore();
-		  const updatedFavorites = store.favorites.filter(fav => fav.uid !== item.uid);
-		  setStore({ favorites: updatedFavorites });
+		actions: {
+			// Use getActions to call a function within a fuction
+			getCharacters: async () => {
+
+				try {
+
+					const url = "https://swapi.tech/api"
+					const options = {
+						method: "GET",
+						headers: {
+							"Content-type": "Application/json"
+						}
+
+					}
+					const respond = await fetch(url + "/people/", options);
+					console.log(respond)
+
+					const body = await respond.json();
+					//console.log(body);
+
+					for (let valor of body.results) {
+
+						getActions().getDetalles(valor.uid)
+
+					}
+					setStore({ Characters: body.results })
+
+				} catch (error) {
+					console.log(error);
+
+				}
+
+			},
+			getDetalles: async (id) => {
+
+				try {
+
+					const url = "https://swapi.tech/api"
+					const options = {
+						method: "GET",
+						headers: {
+							"Content-type": "Application/json"
+						}
+
+					}
+					const respond = await fetch(url + "/people/" + id, options);
+					console.log(respond)
+
+					const body = await respond.json();
+					console.log("funcion getDetalle", body);
+
+					setStore({ Detalles: [...getStore().Detalles, body.result] })
+
+				} catch (error) {
+					console.log(error);
+
+				}
+
+			},
+
+			getDetallado: (id) => {
+				let store = getStore()
+				let a = store.Detalles.filter(item => item.uid == id)[0]
+				return a ? a : {}
+
+			},
+
+
+
+
+			getPlanets: async () => {
+
+				try {
+
+					const url = "https://swapi.tech/api"
+					const options = {
+						method: "GET",
+						headers: {
+							"Content-type": "Application/json"
+						}
+
+					}
+					const respond = await fetch(url + "/planets/", options);
+					console.log(respond)
+
+					const body = await respond.json();
+					//console.log(body);
+
+					for (let valor of body.results) {
+
+						getActions().getDetallesP(valor.uid)
+
+					}
+					setStore({ Planets: body.results })
+
+				} catch (error) {
+					console.log(error);
+
+				}
+
+			},
+			getDetallesP: async (id) => {
+
+				try {
+
+					const url = "https://swapi.tech/api"
+					const options = {
+						method: "GET",
+						headers: {
+							"Content-type": "Application/json"
+						}
+
+					}
+					const respond = await fetch(url + "/planets/" + id, options);
+					//console.log(respond)
+
+					const body = await respond.json();
+					console.log("funcion getDetalle2", body);
+
+					setStore({ DetallesP: [...getStore().DetallesP, body.result] })
+
+				} catch (error) {
+					console.log(error);
+
+				}
+
+			},
+
+			getDetalladoP: (id) => {
+				let store = getStore()
+				let a2 = store.DetallesP.filter(item => item.uid == id)[0]
+				return a2 ? a2 : {}
+
+			},
+
+			agregado: (nombre) => {
+
+				
+
+				if (getStore().listado.includes(nombre) == false) {
+					setStore({ listado: [...getStore().listado, nombre] })
+					getStore().contador++
+				}
+
+			},
+			eliminado: (nombre) => {
+
+				setStore({ listado: getStore().listado.filter((item) => item != nombre) })
+				getStore().contador--
+			},
+
+			boton: (nombre) => {
+
+				return getStore().listado.includes(nombre)
+
+
+
+			}
 		}
-	  }
 	};
-  };
-  
-  export default getState;
+};
+
+export default getState;
