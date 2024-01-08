@@ -1,58 +1,47 @@
 const getState = ({ getStore, getActions, setStore }) => {
 	return {
-		store: {
-			//variables and data
-			favs: null,
-			characters: [],
-			vehicles: [],
-			planets: [],
+	  store: {
+		demo: [
+		  // Your existing demo data remains here
+		],
+		people: [], // New state to store people data from SWAPI
+		planets: [], // New state to store planets data from SWAPI
+		favorites: [] // New state to store favorites
+	  },
+	  actions: {
+		// Your existing actions remain here
+  
+		setPeople: people => {
+		  // Update the store with people data from SWAPI
+		  console.log("Setting people data:", people); // Log the people data
+		  setStore({ people });
 		},
-		actions: {
-			// Use getActions to call a function within a fuction
-			addRemoveFav: (newFav) => {
-				if(!getStore().favs) {
-					setStore({ favs: [newFav] })
-					return 
-				}
-				if (getStore().favs.indexOf(newFav) == -1) {
-					setStore({ favs: [...getStore().favs, newFav] })
-				} else {
-					const newList = getStore().favs.filter(el=> el != newFav)
-					setStore({ favs: newList })
-				}
-			},
-			getCharacterData: async () => {
-				const resp = await fetch("https://www.swapi.tech/api/people")
-				const data = await resp.json()
-				setStore({ characters: data.results })
-				console.log(data.results);
-			},
-			getCharacterDetails: async (uid) => {
-				const resp = await fetch("https://www.swapi.tech/api/people/"+uid)
-				const data = await resp.json()
-				setStore({ characterDetails: data.results })
-				console.log(data.result);
-			},
-			getVehiclesData: async () => {
-				const resp = await fetch("https://www.swapi.tech/api/starships")
-				const data = await resp.json()
-				setStore({ vehicles: data.results })
-				console.log(data.results);
-			},
-			getVehicleDetails: async (uid) => {
-				const resp = await fetch("https://www.swapi.tech/api/starships/"+ uid)
-				const data = await resp.json()
-				setStore({ vehicleDetails: data })
-				console.log(data);
-			},
-			getPlanetsData: async () => {
-				const resp = await fetch("https://www.swapi.tech/api/planets")
-				const data = await resp.json()
-				setStore({ planets: data.results })
-				console.log(data.results);
-			}
+  
+		setPlanets: planets => {
+		  // Update the store with planets data from SWAPI
+		  console.log("Setting planets data:", planets); // Log the planets data
+		  setStore({ planets });
+		},
+  
+		addToFavorites: item => {
+		  // Add item to favorites if not already present
+		  const store = getStore();
+		  const isDuplicate = store.favorites.some(fav => fav.uid === item.uid);
+  
+		  if (!isDuplicate) {
+			setStore({ favorites: [...store.favorites, item] });
+			console.log(`Added to favorites: ${item.name}`);
+		  }
+		},
+  
+		removeFromFavorites: item => {
+		  // Remove item from favorites
+		  const store = getStore();
+		  const updatedFavorites = store.favorites.filter(fav => fav.uid !== item.uid);
+		  setStore({ favorites: updatedFavorites });
 		}
+	  }
 	};
-};
-
-export default getState;
+  };
+  
+  export default getState;

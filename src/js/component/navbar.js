@@ -8,9 +8,9 @@ export const Navbar = () => {
 				<span className="navbar-brand mb-0 h1">React Boilerplate</span>
 			</Link>
 			<div className="ml-auto">
-				<Link to="/demo">
-					<button className="btn btn-primary">fav</button>
-				</Link>
+			
+					<button className="btn btn-primary" >fav</button>
+				
 			</div>
 		</nav>
 	);

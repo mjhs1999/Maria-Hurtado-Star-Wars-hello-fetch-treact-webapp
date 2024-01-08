@@ -18,6 +18,9 @@ export const Home = () => {
 		<div className="container">
 		<div className="inline-scroll">
 			<div className="row">
+				{store.favs && store.favs.map(el => <h1 key={el.uid}>{el.name }</h1>)}
+			</div>
+			<div className="row">
 			<h1 className="text-danger">Characters</h1>
 				<div className="text-center mt-5 d-flex overflow-x-auto">
 					{store.characters.map(el =>	

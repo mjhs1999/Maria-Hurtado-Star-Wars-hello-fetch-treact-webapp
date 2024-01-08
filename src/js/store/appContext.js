@@ -1,48 +1,80 @@
+// appContext.js
 import React, { useState, useEffect } from "react";
-import getState from "./flux.js";
+import getState from "./flux";
 
-// Don't change, here is where we initialize our context, by default it's just going to be null.
 export const Context = React.createContext(null);
 
-// This function injects the global store to any view/component where you want to use it, we will inject the context to layout.js, you can see it here:
-// https://github.com/4GeeksAcademy/react-hello-webapp/blob/master/src/js/layout.js#L35
-const injectContext = PassedComponent => {
-	const StoreWrapper = props => {
-		//this will be passed as the contenxt value
-		const [state, setState] = useState(
-			getState({
-				getStore: () => state.store,
-				getActions: () => state.actions,
-				setStore: updatedStore =>
-					setState({
-						store: Object.assign(state.store, updatedStore),
-						actions: { ...state.actions }
-					})
-			})
-		);
+const injectContext = (PassedComponent) => {
+  const StoreWrapper = (props) => {
+    const [state, setState] = useState(
+      getState({
+        getStore: () => state.store,
+        getActions: () => state.actions,
+        setStore: (updatedStore) =>
+          setState({
+            store: Object.assign(state.store, updatedStore),
+            actions: { ...state.actions },
+          }),
+      })
+    );
 
-		useEffect(() => {
-			/**
-			 * EDIT THIS!
-			 * This function is the equivalent to "window.onLoad", it only runs once on the entire application lifetime
-			 * you should do your ajax requests or fetch api requests here. Do not use setState() to save data in the
-			 * store, instead use actions, like this:
-			 *
-			 * state.actions.loadSomeData(); <---- calling this function from the flux.js actions
-			 *
-			 **/
-		}, []);
+    const setDetails = (details, category) => {
+      setState((prevState) => {
+        const updatedDetails = {
+          ...prevState.store.details,
+          [category]: details,
+        };
 
-		// The initial value for the context is not null anymore, but the current state of this component,
-		// the context will now have a getStore, getActions and setStore functions available, because they were declared
-		// on the state of this component
-		return (
-			<Context.Provider value={state}>
-				<PassedComponent {...props} />
-			</Context.Provider>
-		);
-	};
-	return StoreWrapper;
+        return {
+          store: {
+            ...prevState.store,
+            details: updatedDetails,
+          },
+          actions: { ...prevState.actions },
+        };
+      });
+    };
+
+    const removeFromFavorites = (item) => {
+      const updatedFavorites = state.store.favorites.filter((fav) => fav.uid !== item.uid);
+      setState({ store: { ...state.store, favorites: updatedFavorites }, actions: { ...state.actions, setDetails } });
+    };
+
+    const addToFavorites = (item) => {
+      const isDuplicate = state.store.favorites.some((fav) => fav.uid === item.uid);
+
+      if (!isDuplicate) {
+        const updatedFavorites = [...state.store.favorites, item];
+        setState({ store: { ...state.store, favorites: updatedFavorites }, actions: { ...state.actions, setDetails } });
+
+        // Display a notification or log the name of the added favorite
+        console.log(`Added to favorites: ${item.properties && item.properties.name}`);
+      }
+    };
+
+    useEffect(() => {
+      const fetchData = async () => {
+        try {
+          const response = await fetch("https://www.swapi.tech/api/people");
+          const data = await response.json();
+          console.log("Data from SWAPI:", data); // Log the data
+          state.actions.setPeople(data.results);
+        } catch (error) {
+          console.error("Error fetching data from SWAPI", error);
+        }
+      };
+
+      fetchData();
+    }, []);
+
+    return (
+      <Context.Provider value={{ ...state, actions: { ...state.actions, removeFromFavorites, addToFavorites, setDetails } }}>
+        <PassedComponent {...props} />
+      </Context.Provider>
+    );
+  };
+
+  return StoreWrapper;
 };
 
 export default injectContext;
